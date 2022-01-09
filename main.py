@@ -11,8 +11,16 @@ from engine import RenderEngine
 from light import Light
 from material import Material
 
+import argparse
+
 def main():
     """main function for ray tracer"""
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-imageout", "-path to rendered image")
+
+    args = parser.parse_args()
+
     image_width = 320
     image_height = 200
 
@@ -29,7 +37,7 @@ def main():
     engine = RenderEngine()
     image = engine.render(scene)
 
-    with open("test.ppm", "w", encoding='UTF-8') as img_file:
+    with open(args.imageout, "w", encoding='UTF-8') as img_file:
         image.write_ppm(img_file)
 
 if __name__ == "__main__":
