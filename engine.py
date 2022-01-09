@@ -91,5 +91,6 @@ class RenderEngine:
                 x = x0 + i * xstep
                 ray = Ray(camera, Point(x,y) - camera)
                 pixels.set_pixel(i, j, self.ray_trace(ray, scene))
+            print(f"{float(j)/float(height)*100}", end="\r")
         return pixels
 

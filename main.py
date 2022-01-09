@@ -27,8 +27,8 @@ def main():
     camera = Vector(0, 0, -1)
     objects = [
                     Sphere(Point(0, -0.35, 0), 0.15, Material(Color.from_hex("#ff0000"))),
-                    Sphere(Point(0, 0.35, 0), 0.15, Material(Color.from_hex("#00ff00"))),
-                    Sphere(Point(0, 0, 0.5), 0.23, Material(Color.from_hex("#0000ff")))
+                    Sphere(Point(0, 0.35, 0), 0.15, Material(Color.from_hex("#d0ff00"))),
+                    Sphere(Point(0, 0, 0.5), 0.23, Material(Color.from_hex("#d000ff")))
     ]
 
     lights = [Light(Point(1.5, -0.5, -10.0), Color.from_hex("#ffffff"))]
