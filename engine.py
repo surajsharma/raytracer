@@ -55,7 +55,6 @@ class RenderEngine:
 
     def ray_trace(self, ray, scene, depth=0):
         color = Color(0,0,0)
-        self.find_nearest(ray, scene)
 
         dist_hit, obj_hit = self.find_nearest(ray, scene)
 
@@ -67,8 +66,9 @@ class RenderEngine:
 
         color += self.color_at(obj_hit, hit_pos, hit_normal, scene)
 
-        if depth > self.MAX_DEPTH:
+        if depth < self.MAX_DEPTH:
             new_ray_position = hit_pos + hit_normal * self.MIN_DISPLACE
+
             new_ray_dir = ray.direction - 2 * ray.direction.dot_product(hit_normal) * hit_normal
 
             new_ray = Ray(new_ray_position, new_ray_dir)
