@@ -6,6 +6,12 @@ from image import Image
 from ray import Ray
 from point import Point
 
+import tempfile
+import shutil
+from pathlib import Path
+
+from multiprocessing import Value, Process
+
 class RenderEngine:
     """ render 3d scene """
 
@@ -29,7 +35,7 @@ class RenderEngine:
         material = obj_hit.material
         obj_color = material.color_at(hit_pos)
         to_cam = scene.camera - hit_pos
-        color = material.ambient * Color.from_hex("#000000")
+        color = material.ambient * Color.from_hex("#333333")
 
         specular_k = 50
 
@@ -79,7 +85,47 @@ class RenderEngine:
 
         return color
 
-    def render(self, scene):
+    def render_multiprocess(self, scene, process_count, img_fileobj):
+
+        def split_range(count, parts):
+            d, r = divmod(count, parts)
+            return [(i * d + min(i,r), (i + 1) * d + min(i + 1, r)) for i in range(parts)]
+
+        width = scene.width
+        height = scene.height
+
+        ranges = split_range(height, process_count)
+        temp_dir = Path(tempfile.mkdtemp()) 
+        tmp_file_tmpl = "puray-part-{}.tmp"
+        processes = []
+
+        try:
+            rows_done = Value("i", 0)
+
+            for hmin, hmax in ranges:
+                part_file = temp_dir / tmp_file_tmpl.format(hmin)
+                processes.append(
+                    Process(   target=self.render, 
+                                            args=(scene, hmin, hmax, part_file, rows_done)
+                            ),
+                    )
+
+            for process in processes:
+                process.start()
+
+            for process in processes:
+                process.join()
+
+            Image.write_ppm_header(img_fileobj, height=height, width=width)
+
+            for hmin, _ in ranges:
+                part_file = temp_dir / tmp_file_tmpl.format(hmin)
+                img_fileobj.write(open(part_file, "r").read())
+
+        finally:
+            shutil.rmtree(temp_dir)
+
+    def render(self, scene, hmin, hmax, part_file, rows_done):
         width = scene.width
         height = scene.height
 
@@ -96,20 +142,22 @@ class RenderEngine:
         ystep = (y1 - y0) / (height - 1)
 
         camera = scene.camera
-        pixels = Image(width, height)
+        pixels = Image(width, hmax-hmin)
 
-
-        for j in range(height):
+        for j in range(hmax, hmin):
             y = y0 + j * ystep
             
             for i in range(width):
                 x = x0 + i * xstep
-
                 ray = Ray(camera, Point(x,y) - camera)
+                pixels.set_pixel(i, j-hmin, self.ray_trace(ray, scene))
 
-                pixels.set_pixel(i, j, self.ray_trace(ray, scene))
 
-            print(f"{float(j)/float(height)*100}", end="\r")
             #progress indicator
-        return pixels
+            if rows_done:
+                with rows_done.get_lock():
+                    rows_done.value += 1
+                    print(f"{float(rows_done.value)/float(height)*100}", end="\r")
 
+        with open(part_file, "w") as part_fileobj:
+            pixels.write_ppm_raw(part_fileobj)

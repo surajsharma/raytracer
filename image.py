@@ -1,6 +1,5 @@
 """Image class for rayt racer"""
 
-
 class Image:
     """image class"""
 
@@ -14,14 +13,20 @@ class Image:
         self.pixels[p_y][p_x] = col
 
     def write_ppm(self, img_file):
-        """write a ppm file"""
-        def to_byte(_c):
-            return round(max(min(_c * 255, 255), 0))
+        Image.write_ppm_header(img_fileobj,height=self.height, width=self.width)
+        self.write_ppm_raw(img_fileobj)
 
-        img_file.write(f"P3 {self.width} {self.height}\n255\n")
+    @staticmethod
+    def write_ppm_header(img_fileobj, height=None, width=None):
+        """Writes headers"""
+        img_fileobj.write(f"P3 {width} {height}\n255\n")
+
+    def write_ppm_raw(self, img_fileobj):
+        """write a ppm file"""
+        def to_byte(c):
+            return round(max(min(c * 255, 255), 0))
 
         for row in self.pixels:
             for color in row:
-                img_file.write(
-                    f"{to_byte(color.v_x)} {to_byte(color.v_y)} {to_byte(color.v_z)} ")
-                img_file.write("\n")
+                img_fileobj.write(f"{to_byte(color.v_x)} {to_byte(color.v_y)} {to_byte(color.v_z)} ")
+                img_fileobj.write("\n")
