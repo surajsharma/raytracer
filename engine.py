@@ -9,6 +9,9 @@ from point import Point
 class RenderEngine:
     """ render 3d scene """
 
+    MAX_DEPTH = 5
+    MIN_DISPLACE = 0.0001
+
     def find_nearest(self,ray,scene):
         dist_min = None
         obj_hit = None
@@ -50,7 +53,7 @@ class RenderEngine:
 
         return color
 
-    def ray_trace(self, ray, scene):
+    def ray_trace(self, ray, scene, depth=0):
         color = Color(0,0,0)
         self.find_nearest(ray, scene)
 
@@ -63,6 +66,17 @@ class RenderEngine:
         hit_normal = obj_hit.normal(hit_pos)
 
         color += self.color_at(obj_hit, hit_pos, hit_normal, scene)
+
+        if depth > self.MAX_DEPTH:
+            new_ray_position = hit_pos + hit_normal * self.MIN_DISPLACE
+            new_ray_dir = ray.direction - 2 * ray.direction.dot_product(hit_normal) * hit_normal
+
+            new_ray = Ray(new_ray_position, new_ray_dir)
+
+            # attenuate the reflected ray by the reflecton coefficient
+
+            color +=(self.ray_trace(new_ray, scene, depth+1) * obj_hit.material.reflection)
+
         return color
 
     def render(self, scene):
@@ -87,10 +101,15 @@ class RenderEngine:
 
         for j in range(height):
             y = y0 + j * ystep
+            
             for i in range(width):
                 x = x0 + i * xstep
+
                 ray = Ray(camera, Point(x,y) - camera)
+
                 pixels.set_pixel(i, j, self.ray_trace(ray, scene))
+
             print(f"{float(j)/float(height)*100}", end="\r")
+            #progress indicator
         return pixels
 

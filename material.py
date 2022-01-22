@@ -18,7 +18,7 @@ class Material:
 
         self.reflection=reflection
     
-    def color_at(self):
+    def color_at(self, position):
         return self.color
 
 
@@ -40,7 +40,7 @@ class ChequeredMaterial:
         self.reflection=reflection
     
     def color_at(self, position):
-        if int((position.x+5.0)*3.0)%2==int(position.z * 3.0) % 2:
+        if int((position.v_x+5.0)*3.0)%2==int(position.v_z * 3.0) % 2:
             return self.color1
         else:
             return self.color2

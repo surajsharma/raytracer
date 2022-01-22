@@ -12,10 +12,12 @@ def main():
     """main function for ray tracer"""
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-scene", "-path to scene file")
+    parser.add_argument("-scene", help="Path to scene file")
 
     args = parser.parse_args()
+
     mod = importlib.import_module(args.scene)
+    
     scene = Scene(mod.CAMERA, mod.OBJECTS, mod.LIGHTS, mod.WIDTH, mod.HEIGHT)
 
     engine = RenderEngine()
