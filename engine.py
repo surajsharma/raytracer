@@ -144,7 +144,7 @@ class RenderEngine:
         camera = scene.camera
         pixels = Image(width, hmax-hmin)
 
-        for j in range(hmax, hmin):
+        for j in range(hmin, hmax):
             y = y0 + j * ystep
             
             for i in range(width):
