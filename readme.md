@@ -2,7 +2,7 @@
 
 -   simple raytracer with multithreading written in Python.
 
-![alt](examples/2balls.ppm)
+![raytracer](https://ipfs.infura.io/ipfs/QmaogBtA7JCihuGRvCtYABi1viCdvc3uS2Df4EGav7kFeC)
 
 #### How to use
 
