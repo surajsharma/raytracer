@@ -22,7 +22,7 @@ from material import ChequeredMaterial
 
 WIDTH = 960
 HEIGHT = 540
-RENDERED_IMG="2balls.ppm"
+RENDERED_IMG="twoballs.ppm"
 
 CAMERA= Vector(0,-0.35, -1)
 
@@ -36,4 +36,3 @@ LIGHTS = [
     Light(Point(1.5,-.5,-10), Color.from_hex("#000000")),
     Light(Point(-.5,-10.5,0), Color.from_hex("#000000"))
 ]
-

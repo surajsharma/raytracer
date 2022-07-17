@@ -5,10 +5,10 @@ import argparse
 import importlib
 import os
 
+from multiprocessing import cpu_count
+
 from scene import Scene
 from engine import RenderEngine
-
-from multiprocessing import cpu_count
 
 def main():
     """main function for ray tracer"""
