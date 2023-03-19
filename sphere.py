@@ -13,7 +13,6 @@ class Sphere:
         """returns surface normal to the point on sphere's surface"""
         return (surface_point-self.center).normalize()
 
-
     def intersects(self, ray):
         """checks if ray intersects with sphere, returns distance or none"""
         sphere_to_ray = ray.origin - self.center

@@ -12,13 +12,16 @@ from pathlib import Path
 
 from multiprocessing import Value, Process
 
+from timer import timed
+
+
 class RenderEngine:
     """ render 3d scene """
 
     MAX_DEPTH = 5
     MIN_DISPLACE = 0.0001
 
-    def find_nearest(self,ray,scene):
+    def find_nearest(self, ray, scene):
         dist_min = None
         obj_hit = None
 
@@ -40,27 +43,26 @@ class RenderEngine:
         specular_k = 50
 
         for light in scene.lights:
-            to_light = Ray(hit_pos, light.position- hit_pos)
+            to_light = Ray(hit_pos, light.position - hit_pos)
 
             color += (
-                obj_color 
-                * material.diffuse 
-                * max(normal.dot_product(to_light.direction),0)
-                )
-            
+                obj_color
+                * material.diffuse
+                * max(normal.dot_product(to_light.direction), 0)
+            )
 
-            #Specular shading
+            # Specular shading
             half_vector = (to_light.direction + to_cam).normalize()
             color += (
-                light.color 
-                * material.specular 
-                * max(normal.dot_product(half_vector),0) ** specular_k
+                light.color
+                * material.specular
+                * max(normal.dot_product(half_vector), 0) ** specular_k
             )
 
         return color
 
     def ray_trace(self, ray, scene, depth=0):
-        color = Color(0,0,0)
+        color = Color(0, 0, 0)
 
         dist_hit, obj_hit = self.find_nearest(ray, scene)
 
@@ -75,27 +77,30 @@ class RenderEngine:
         if depth < self.MAX_DEPTH:
             new_ray_position = hit_pos + hit_normal * self.MIN_DISPLACE
 
-            new_ray_dir = ray.direction - 2 * ray.direction.dot_product(hit_normal) * hit_normal
+            new_ray_dir = ray.direction - 2 * \
+                ray.direction.dot_product(hit_normal) * hit_normal
 
             new_ray = Ray(new_ray_position, new_ray_dir)
 
             # attenuate the reflected ray by the reflecton coefficient
 
-            color +=(self.ray_trace(new_ray, scene, depth+1) * obj_hit.material.reflection)
+            color += (self.ray_trace(new_ray, scene, depth+1)
+                      * obj_hit.material.reflection)
 
         return color
 
+    @timed
     def render_multiprocess(self, scene, process_count, img_fileobj):
 
         def split_range(count, parts):
             d, r = divmod(count, parts)
-            return [(i * d + min(i,r), (i + 1) * d + min(i + 1, r)) for i in range(parts)]
+            return [(i * d + min(i, r), (i + 1) * d + min(i + 1, r)) for i in range(parts)]
 
         width = scene.width
         height = scene.height
 
         ranges = split_range(height, process_count)
-        temp_dir = Path(tempfile.mkdtemp()) 
+        temp_dir = Path(tempfile.mkdtemp())
         tmp_file_tmpl = "puray-part-{}.tmp"
         processes = []
 
@@ -105,10 +110,10 @@ class RenderEngine:
             for hmin, hmax in ranges:
                 part_file = temp_dir / tmp_file_tmpl.format(hmin)
                 processes.append(
-                    Process(   target=self.render, 
-                                            args=(scene, hmin, hmax, part_file, rows_done)
+                    Process(target=self.render,
+                            args=(scene, hmin, hmax, part_file, rows_done)
                             ),
-                    )
+                )
 
             for process in processes:
                 process.start()
@@ -135,7 +140,7 @@ class RenderEngine:
         x1 = +1.0
 
         xstep = (x1-x0) / (width - 1)
-        
+
         y0 = -1.0 / aspect_ratio
         y1 = +1.0 / aspect_ratio
 
@@ -146,14 +151,13 @@ class RenderEngine:
 
         for j in range(hmin, hmax):
             y = y0 + j * ystep
-            
+
             for i in range(width):
                 x = x0 + i * xstep
-                ray = Ray(camera, Point(x,y) - camera)
+                ray = Ray(camera, Point(x, y) - camera)
                 pixels.set_pixel(i, j-hmin, self.ray_trace(ray, scene))
 
-
-            #progress indicator
+            # progress indicator
             if rows_done:
                 with rows_done.get_lock():
                     rows_done.value += 1

@@ -10,12 +10,14 @@ from multiprocessing import cpu_count
 from scene import Scene
 from engine import RenderEngine
 
+
 def main():
     """main function for ray tracer"""
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-scene", help="Path to scene file")
-    parser.add_argument("-p", "--processes" , action="store", type=int, dest="processes", default=0, help="Number of processes (0=auto)")
+    parser.add_argument("-p", "--processes", action="store", type=int,
+                        dest="processes", default=0, help="Number of processes (0=auto)")
 
     args = parser.parse_args()
 
@@ -32,6 +34,7 @@ def main():
 
     with open(mod.RENDERED_IMG, "w", encoding='UTF-8') as img_fileobj:
         engine.render_multiprocess(scene, process_count, img_fileobj)
+
 
 if __name__ == "__main__":
     main()
