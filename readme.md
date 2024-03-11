@@ -2,7 +2,6 @@
 
 -   simple raytracer with multithreading written in Python.
 
-![image](https://bafybeig2346ub7lsbfbkumiznegq6qgqsus7kenp7wg6vpyyehyagnwiuq.ipfs.infura-ipfs.io/)
 [![asciicast](https://asciinema.org/a/NfxPm895hjRYTvJzflE00QeoA.svg)](https://asciinema.org/a/NfxPm895hjRYTvJzflE00QeoA)
 
 #### How to use
